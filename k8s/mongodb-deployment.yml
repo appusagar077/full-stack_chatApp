@@ -12,19 +12,51 @@ spec:
     metadata:
       name: mongodb-pod
       namespace: chat-app
-      labels: 
+      labels:
         app: mongodb
     spec:
       containers:
       - name: chatapp-mongodb
-        image: mongo:latest
+        image: mongo:6.0
         ports:
         - containerPort: 27017
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
-          value: mongoadmin
+          valueFrom:
+            secretKeyRef:
+              name: chatapp-secrets
+              key: mongo-username
         - name: MONGO_INITDB_ROOT_PASSWORD
-          value: secret
+          valueFrom:
+            secretKeyRef:
+              name: chatapp-secrets
+              key: mongo-password
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 20
+          periodSeconds: 20
       volumes:
       - name: mongo-data
         persistentVolumeClaim:
