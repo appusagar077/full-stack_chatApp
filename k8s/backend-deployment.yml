@@ -12,23 +12,45 @@ spec:
     metadata:
       name: backend-pod
       namespace: chat-app
-      labels: 
+      labels:
         app: backend
     spec:
       containers:
       - name: chatapp-backend
-        image: trainwithshubham/chatapp-backend:latest
+        image: <your-account-id>.dkr.ecr.<region>.amazonaws.com/chatapp-backend:v1
         ports:
         - containerPort: 5001
         env:
         - name: NODE_ENV
           value: production
+        - name: PORT
+          value: "5001"
         - name: MONGODB_URI
-          value: "mongodb://mongoadmin:secret@mongodb:27017/dbname?authSource=admin"
+          valueFrom:
+            secretKeyRef:
+              name: chatapp-secrets
+              key: mongodb-uri
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
               name: chatapp-secrets
-              key: jwt 
-        - name: PORT
-          value: "5001"
+              key: jwt
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 5001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5001
+          initialDelaySeconds: 15
+          periodSeconds: 20
