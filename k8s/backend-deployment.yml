@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: chatapp-backend
-        image: <your-account-id>.dkr.ecr.<region>.amazonaws.com/chatapp-backend:v1
+        image: 735910966675.dkr.ecr.us-west-1.amazonaws.com/chatapp-backend
         ports:
         - containerPort: 5001
         env:
