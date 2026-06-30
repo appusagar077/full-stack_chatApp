@@ -6,24 +6,25 @@ metadata:
   labels:
     name: chatapp-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
   rules:
-  - host: chat-tws.com
-    http:
+  - http:
       paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: frontend
-            port: 
-              number: 80
       - pathType: Prefix
         path: "/api"
         backend:
           service:
             name: backend
-            port: 
+            port:
               number: 5001
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
