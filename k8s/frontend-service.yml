@@ -3,9 +3,14 @@ kind: Service
 metadata:
   name: frontend
   namespace: chat-app
+
 spec:
+  type: LoadBalancer
+
   selector:
     app: frontend
+
   ports:
-  - port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 80
+      targetPort: 80
