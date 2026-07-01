@@ -30,12 +30,45 @@ This project demonstrates deploying a real-world full-stack application on Kuber
 ## 🏗️ Architecture
 
 ```
-<img width="1200" height="1000" alt="chatsphere_architecture" src="https://github.com/user-attachments/assets/18145c35-3f28-4ed0-b6f7-4541745d4abb" />
-
+Internet
+                           │
+                           ▼
+                    AWS ALB (Ingress)
+                    internet-facing
+                    us-west-1 · Port 80
+                           │
+               ┌───────────┴───────────┐
+               │ path-based routing    │
+               │                       │
+          path: /api             path: /
+               │                       │
+               ▼                       ▼
+     ┌─────────────────┐     ┌─────────────────┐
+     │    Backend      │     │    Frontend     │
+     │  Node.js/Express│     │  React/Tailwind │
+     │  Port: 5001     │     │  Port: 80       │
+     │  ClusterIP Svc  │     │  ClusterIP Svc  │
+     └────────┬────────┘     └─────────────────┘
+              │
+              ▼
+     ┌─────────────────┐
+     │    MongoDB      │
+     │  mongo:6.0      │
+     │  Port: 27017    │
+     │  ClusterIP Svc  │
+     └────────┬────────┘
+              │
+              ▼
+     ┌─────────────────┐
+     │   EBS Volume    │
+     │  gp2 · 5Gi     │
+     │  PVC (Bound)    │
+     └─────────────────┘
 
 IAM Role → AWS Load Balancer Controller (kube-system)
 EBS CSI Driver → Dynamic EBS volume provisioning
 ECR → chatapp-backend:v1, chatapp-frontend:v1
+
 ```
 
 ---
